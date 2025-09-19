@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Placement Test</title>
+    <style>
+        :root {
+            --primary-color: #005a9e; /* Agribusiness blue */
+            --secondary-color: #4caf50; /* Green for success */
+            --light-gray: #f4f4f4;
+            --dark-gray: #333;
+            --border-radius: 8px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for longer content */
+            min-height: 100vh;
+            background-color: var(--light-gray);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .content {
+            padding: 30px;
+        }
+        h1, h2 {
+            color: var(--primary-color);
+        }
+        p {
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color: 0.3s ease;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #004175;
+        }
+        #quiz-container, #results-container, #admin-container, #loading-container {
+            display: none;
+        }
+        #progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 10px;
+            background-color: var(--secondary-color);
+            transition: width 0.4s ease-in-out;
+        }
+        #question-text {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        #audio-player {
+            margin: 20px 0;
+            width: 100%;
+        }
+        #options-container {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        #options-container li button {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            border: 1px solid #dee2e6;
+            text-align: left;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+        #options-container li button:hover {
+            background-color: #e9ecef;
+        }
+        #options-container li button.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+        #options-container li button.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+        #options-container li button:disabled {
+            cursor: not-allowed;
+        }
+        #final-score {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin: 20px 0;
+        }
+        #cefr-level {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        /* Admin Table Styles */
+        #admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #admin-table th, #admin-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        #admin-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        #admin-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Loading Screen -->
+    <div id="loading-container" class="content">
+        <h2>Loading...</h2>
+        <p>Connecting to the database.</p>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-container" class="content">
+        <h1>English Placement Test</h1>
+        <p>Welcome! This 20-question test will assess your English proficiency. Please enter your first and last name to begin. Good luck! 🍀</p>
+        <div class="input-group">
+            <input type="text" id="student-first-name" placeholder="First Name">
+            <input type="text" id="student-last-name" placeholder="Last Name">
+        </div>
+        <button onclick="startTest()">Start Test</button>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz-container" class="content">
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <h2 id="question-text">Question text goes here...</h2>
+        <audio id="audio-player" controls></audio>
+        <ul id="options-container"></ul>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-container" class="content">
+        <h2>Test Complete!</h2>
+        <p>Thank you for participating.</p>
+        <p>Your estimated proficiency level is:</p>
+        <div id="cefr-level"></div>
+        <p>You answered</p>
+        <div id="final-score"></div>
+        <p>Your result has been saved.</p>
+        <button onclick="restartTest()">Take Test Again</button>
+    </div>
+    
+    <!-- Admin Screen -->
+    <div id="admin-container" class="content">
+        <h2>Admin Panel - Test Results</h2>
+        <p>Displaying all submitted results.</p>
+        <table id="admin-table">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Result (CEFR)</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="results-body">
+                <!-- Results will be loaded here -->
+            </tbody>
+        </table>
+         <button onclick="window.location.search = ''" style="margin-top: 20px;">Back to Test</button>
+    </div>
+</div>
+
+<!-- Firebase Libraries -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, Timestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- Firebase Configuration ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyA4EdLVu8PBg0aEHoCss-KZOOHYV7yBFb4",
+      authDomain: "english-placement-test-7601f.firebaseapp.com",
+      projectId: "english-placement-test-7601f",
+      storageBucket: "english-placement-test-7601f.firebasestorage.app",
+      messagingSenderId: "285559906605",
+      appId: "1:285559906605:web:c6d024c67b90763783f3a4",
+      measurementId: "G-SS4HBE6R81"
+    };
+    // -----------------------------
+
+    // --- Your JSON Data ---
+    const testData = {
+        "questions": [{"id":1,"level":"A1","type":"reading","question":"Choose the correct option: 'Hello, how ___ you?'","options":["is","are","am","be"],"answer":"are"},{"id":2,"level":"A1","type":"grammar","question":"Select the correct sentence:","options":["She like apples.","She likes apples.","She liking apples.","She liked apples."],"answer":"She likes apples."},{"id":3,"level":"A1","type":"vocabulary","question":"Which word is a color?","options":["chair","blue","run","happy"],"answer":"blue"},{"id":4,"level":"A2","type":"grammar","question":"Choose the past form of 'go':","options":["goed","goes","went","gone"],"answer":"went"},{"id":5,"level":"A2","type":"vocabulary","question":"Which one is an animal?","options":["table","dog","happy","sing"],"answer":"dog"},{"id":6,"level":"A2","type":"reading","question":"Fill in the blank: 'I usually ___ breakfast at 7 a.m.'","options":["eat","eats","ate","eaten"],"answer":"eat"},{"id":7,"level":"B1","type":"reading","question":"Choose the correct sentence:","options":["I have visited London last year.","I visited London last year.","I visiting London last year.","I was visit London last year."],"answer":"I visited London last year."},{"id":8,"level":"B1","type":"grammar","question":"Select the correct option: 'If it ___ tomorrow, we will stay at home.'","options":["rain","rains","raining","rained"],"answer":"rains"},{"id":9,"level":"B1","type":"vocabulary","question":"Which word means 'to improve something'?","options":["destroy","enhance","ignore","prevent"],"answer":"enhance"},{"id":10,"level":"B2","type":"reading","question":"Choose the best option: 'She was promoted ___ her excellent performance.'","options":["because","because of","due","so"],"answer":"because of"},{"id":11,"level":"B2","type":"grammar","question":"Select the correct option: 'I wish I ___ more time to study.'","options":["have","had","has","having"],"answer":"had"},{"id":12,"level":"B2","type":"vocabulary","question":"Which word means 'very important'?","options":["trivial","crucial","tiny","ordinary"],"answer":"crucial"},
+        { "id": 13, "level": "B2", "type": "listening", "question": "Listen to the audio. From which platform will the train depart?", "audioFile": "ttsreader_13.mp3", "options": ["Platform 1", "Platform 3", "Platform 7", "Platform 10"], "answer": "Platform 3" },
+        {"id":14,"level":"C1","type":"grammar","question":"Choose the correct option: 'Had I known about the traffic, I ___ earlier.'","options":["leave","left","would have left","will leave"],"answer":"would have left"},{"id":15,"level":"C1","type":"vocabulary","question":"Which word is closest in meaning to 'resilient'?","options":["fragile","strong","delicate","weak"],"answer":"strong"},{"id":16,"level":"C1","type":"reading","question":"Choose the correct completion: 'The manager demanded that every employee ___ on time.'","options":["is","are","be","was"],"answer":"be"},{"id":17,"level":"C1","type":"listening","question":"Listen to the audio and choose the best answer.","audioFile":"ttsreader_17.mp3","options":["The speaker is discussing environmental issues.","The speaker is telling a funny story.","The speaker is explaining a recipe.","The speaker is describing a sport."],"answer":"The speaker is discussing environmental issues."},{"id":18,"level":"C2","type":"grammar","question":"Choose the correct option: 'No sooner ___ the meeting started than the fire alarm went off.'","options":["had","have","has","having"],"answer":"had"},{"id":19,"level":"C2","type":"vocabulary","question":"Which word best fits: 'His speech was so ___ that everyone was convinced.'","options":["persuasive","boring","confusing","irrelevant"],"answer":"persuasive"},
+        { "id": 20, "level": "C2", "type": "listening", "question": "Listen to the audio. What was said about the committee's decision?", "audioFile": "ttsreader_20.mp3", "options": ["It was expected.", "It was unexpected.", "It was ignored.", "It was postponed."], "answer": "It was unexpected." }
+        ]
+    };
+
+    // --- DOM Elements ---
+    const loadingContainer = document.getElementById('loading-container');
+    const startContainer = document.getElementById('start-container');
+    const quizContainer = document.getElementById('quiz-container');
+    const resultsContainer = document.getElementById('results-container');
+    const adminContainer = document.getElementById('admin-container');
+    const questionTextEl = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const audioPlayer = document.getElementById('audio-player');
+    const progressBar = document.getElementById('progress-bar');
+    const cefrLevelEl = document.getElementById('cefr-level');
+    const finalScoreEl = document.getElementById('final-score');
+    
+    // --- App State ---
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = [];
+    let db; // Firestore database instance
+
+    // --- Firebase Initialization ---
+    async function initializeFirebase() {
+        try {
+            if (!firebaseConfig || !firebaseConfig.apiKey) {
+                 console.error("Firebase config is missing. It should be directly in the index.html script.");
+                 loadingContainer.style.display = 'none';
+                 startContainer.style.display = 'block';
+                 alert("Database connection not configured. Results will not be saved.");
+                 return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            const auth = getAuth(app);
+            
+            await signInAnonymously(auth);
+
+            console.log("Firebase initialized and user signed in.");
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('admin') === 'true') {
+                loadResultsForAdmin();
+            } else {
+                loadingContainer.style.display = 'none';
+                startContainer.style.display = 'block';
+            }
+
+        } catch (error) {
+            console.error("Error initializing Firebase:", error);
+            loadingContainer.style.display = 'none';
+            startContainer.style.display = 'block';
+            alert("Could not connect to the database. Results will not be saved. Please check Firestore rules.");
+        }
+    }
+
+
+    // --- Core App Logic ---
+    window.startTest = function() {
+        const firstName = document.getElementById('student-first-name').value;
+        const lastName = document.getElementById('student-last-name').value;
+
+        if (firstName.trim() === '' || lastName.trim() === '') {
+            alert('Please enter your first and last name to start.');
+            return;
+        }
+
+        startContainer.style.display = 'none';
+        quizContainer.style.display = 'block';
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        optionsContainer.innerHTML = '';
+        audioPlayer.style.display = 'none';
+
+        const questionData = testData.questions[currentQuestionIndex];
+        questionTextEl.innerText = `(${currentQuestionIndex + 1}/20) ${questionData.question}`;
+
+        const progress = ((currentQuestionIndex + 1) / testData.questions.length) * 100;
+        progressBar.style.width = progress + '%';
+
+        if (questionData.type === 'listening') {
+            audioPlayer.src = questionData.audioFile;
+            audioPlayer.style.display = 'block';
+        }
+
+        questionData.options.forEach(option => {
+            const li = document.createElement('li');
+            const button = document.createElement('button');
+            button.innerText = option;
+            button.onclick = () => selectAnswer(button, option);
+            li.appendChild(button);
+            optionsContainer.appendChild(li);
+        });
+    }
+
+    function selectAnswer(button, selectedOption) {
+        const questionData = testData.questions[currentQuestionIndex];
+        const isCorrect = selectedOption === questionData.answer;
+
+        if (isCorrect) {
+            score++;
+        }
+        userAnswers.push({ level: questionData.level, correct: isCorrect });
+
+        const buttons = optionsContainer.querySelectorAll('button');
+        buttons.forEach(btn => {
+            if (btn.innerText === questionData.answer) btn.classList.add('correct');
+            else if (btn.innerText === selectedOption) btn.classList.add('incorrect');
+            btn.disabled = true;
+        });
+
+        setTimeout(() => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < testData.questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }, 1200);
+    }
+
+    function calculateCEFR() {
+        const levels = ['C2', 'C1', 'B2', 'B1', 'A2'];
+        const levelThreshold = 0.75;
+        for (const level of levels) {
+            const levelQuestions = userAnswers.filter(a => a.level === level);
+            const correctAnswers = levelQuestions.filter(a => a.correct).length;
+            const accuracy = levelQuestions.length > 0 ? correctAnswers / levelQuestions.length : 0;
+            if (accuracy >= levelThreshold) return level;
+        }
+        return 'A1';
+    }
+
+    async function showResults() {
+        quizContainer.style.display = 'none';
+        resultsContainer.style.display = 'block';
+
+        const finalLevel = calculateCEFR();
+        cefrLevelEl.innerText = finalLevel;
+        finalScoreEl.innerText = `${score} / ${testData.questions.length}`;
+
+        await saveResultsToFirestore(finalLevel);
+    }
+    
+    async function saveResultsToFirestore(level) {
+        if (!db) {
+            console.error("Database not initialized. Cannot save results.");
+            return;
+        }
+
+        const firstName = document.getElementById('student-first-name').value;
+        const lastName = document.getElementById('student-last-name').value;
+        const appId = firebaseConfig.projectId || 'default-app-id';
+
+        try {
+            const resultsCollection = collection(db, `/artifacts/${appId}/public/data/results`);
+            await addDoc(resultsCollection, {
+                firstName: firstName,
+                lastName: lastName,
+                result: level,
+                score: score,
+                total: testData.questions.length,
+                timestamp: Timestamp.now()
+            });
+            console.log("Result saved successfully!");
+        } catch (error) {
+            console.error("Error writing document: ", error);
+        }
+    }
+
+
+    window.restartTest = function() {
+        currentQuestionIndex = 0;
+        score = 0;
+        userAnswers = [];
+        resultsContainer.style.display = 'none';
+        startContainer.style.display = 'block';
+        document.getElementById('student-first-name').value = '';
+        document.getElementById('student-last-name').value = '';
+    }
+
+    // --- Admin Logic ---
+    async function loadResultsForAdmin() {
+        if (!db) {
+            console.error("Database not initialized. Cannot load results.");
+            alert("Database connection failed. Cannot load admin results.");
+            loadingContainer.style.display = 'none';
+            adminContainer.style.display = 'block';
+            return;
+        }
+        
+        loadingContainer.style.display = 'block';
+        startContainer.style.display = 'none';
+
+        const appId = firebaseConfig.projectId || 'default-app-id';
+        const resultsCollectionRef = collection(db, `/artifacts/${appId}/public/data/results`);
+        const q = query(resultsCollectionRef, orderBy("timestamp", "desc"));
+        
+        const querySnapshot = await getDocs(q);
+        const resultsBody = document.getElementById('results-body');
+        resultsBody.innerHTML = ''; 
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const row = resultsBody.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            const cell3 = row.insertCell(2);
+            cell1.textContent = `${data.firstName} ${data.lastName}`;
+            cell2.textContent = data.result;
+            cell3.textContent = data.timestamp.toDate().toLocaleString();
+        });
+        
+        loadingContainer.style.display = 'none';
+        adminContainer.style.display = 'block';
+    }
+
+
+    // --- App Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+        startContainer.style.display = 'none';
+        loadingContainer.style.display = 'block';
+        initializeFirebase();
+    });
+
+</script>
+
+</body>
+</html>
+
